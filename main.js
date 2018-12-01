@@ -1,22 +1,29 @@
-const vertexShaderText = [
-  'precision mediump float;',
-  '',
-  'attribute vec2 vertPosition;',
-  '',
-  'void main()',
-  '{',
-  ' gl_Position = vec4(vertPosition, 0.0, 1.0);',
-  '}'
-].join('\n');
+var vertexShaderText =
+  [
+    'precision mediump float;',
+    '',
+    'attribute vec2 vertPosition;',
+    'attribute vec3 vertColor;',
+    'varying vec3 fragColor;',
+    '',
+    'void main()',
+    '{',
+    '  fragColor = vertColor;',
+    '  gl_Position = vec4(vertPosition, 0.0, 1.0);',
+    '}'
+  ].join('\n');
 
-const fragmentShaderText = [
-  'precision mediump float;',
-  '',
-  'void main()',
-  '{',
-  ' gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);',
-  '}'
-].join('\n');
+var fragmentShaderText =
+  [
+    'precision mediump float;',
+    '',
+    'varying vec3 fragColor;',
+    'void main()',
+    '{',
+    '  gl_FragColor = vec4(fragColor, 1.0);',
+    '}'
+  ].join('\n');
+
 
 const initDemo = () => {
   const canvas = document.createElement('canvas');
@@ -76,15 +83,22 @@ const initDemo = () => {
   ///BUFFER
   ///
 
-  const triangleVertices = [0.0, 0.5, -0.5, -0.5, 0.5, -0.5];  // [x, y, (counterclockwise)]
+  const triangleVertices = [// [x, y, R,G,B
+    0.0, 0.5, 1.0, 0.0, 0.0,
+    -0.5, -0.5, 0.0, 0., 1.0,
+    0.5, -0.5, 0.0, 1.0, 0.
+  ];
   const trianglevertexBufferObject = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, trianglevertexBufferObject); // binding to the active buffer
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);// the buffer takes in 64bits and the vertices is in 32
 
   const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
-  gl.vertexAttribPointer(positionAttribLocation, 2, gl.FLOAT, gl.FALSE, 2 * Float32Array.BYTES_PER_ELEMENT, 0);  //(attribute location, number of elements, type of elements, bool, size of individual vertex, offset from beginning of a single vertex to this attribute)
+  const colorAttribLocation = gl.getAttribLocation(program, 'vertColor');
+  gl.vertexAttribPointer(positionAttribLocation, 2, gl.FLOAT, gl.FALSE, 5 * Float32Array.BYTES_PER_ELEMENT, 0);  //(attribute location, number of elements, type of elements, bool, size of individual vertex, offset from beginning of a single vertex to this attribute)
+  gl.vertexAttribPointer(colorAttribLocation, 3, gl.FLOAT, gl.FALSE, 5 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
 
   gl.enableVertexAttribArray(positionAttribLocation);
+  gl.enableVertexAttribArray(colorAttribLocation);
 
   /// Main render loop
 
