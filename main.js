@@ -190,8 +190,8 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
   // Create a perspective matrix
 
-  const fieldOfView = 100 * Math.PI / 180;   // in radians
-  const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+  const fieldOfView = 60 * Math.PI / 180;   // in radians
+  const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;  /// client height and width is the space in the body excluding the scroll bar, margin, border
   const zNear = 0.1;
   const zFar = 100.0;
   const projectionMatrix = glMatrix.mat4.create();
