@@ -19,13 +19,14 @@ const geometryPlane = new THREE.PlaneGeometry(5, 5, 4);
 const materialPlane = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
 const plane = new THREE.Mesh(geometryPlane, materialPlane);
 plane.rotation.x = 360;
-plane.translateOnAxis(new THREE.Vector3(-1, 0.5, 0), 3);
+plane.translateOnAxis(new THREE.Vector3(-1, 0.5, 0.25), 3);
 scene.add(plane);
 
 const geometryPlane2 = new THREE.PlaneGeometry(5, 5, 4);
 const materialPlane2 = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
 const plane2 = new THREE.Mesh(geometryPlane2, materialPlane2);
 plane2.rotation.x = 360;
+plane2.translateOnAxis(new THREE.Vector3(1, 0.5, 0.25), 3);
 scene.add(plane2);
 
 // cube.position.copy(geometry);
@@ -40,8 +41,8 @@ camera.position.z = 5;
 const animate = () => {
   requestAnimationFrame(animate);
 
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+  //   cube.rotation.x += 0.01;
+  //   cube.rotation.y += 0.01;
   renderer.render(scene, camera);
 };
 
@@ -55,19 +56,18 @@ const randomColor = () => {
   return hexColor.toString();
 };
 
-const instantiateCube = () => {
-  for (let i = 0; i < 10; i++) {
-    let clonedCube = cube.clone();
-    clonedCube.position.x = Math.random() * -6;
-    clonedCube.position.y = Math.random() * 2;
-    clonedCube.position.z = Math.random() * -3;
-    clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-    scene.add(clonedCube);
 
-  }
+const instantiateCube = () => {
+  let clonedCube = cube.clone();
+  clonedCube.position.x = -1;
+  clonedCube.position.y = 0;
+  clonedCube.position.z = 3;
+  clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+  scene.add(clonedCube);
+
 }
 
-instantiateCube();
+setInterval(instantiateCube, 2000);
 
 // var animate = function () {
 //   var quaternion = new THREE.Quaternion();
