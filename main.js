@@ -40,7 +40,6 @@ camera.position.z = 5;
 
 const animate = () => {
   requestAnimationFrame(animate);
-
   //   cube.rotation.x += 0.01;
   //   cube.rotation.y += 0.01;
   renderer.render(scene, camera);
@@ -57,17 +56,58 @@ const randomColor = () => {
 };
 
 
-const instantiateCube = () => {
+const instantiateCubeLeft = () => {
   let clonedCube = cube.clone();
   clonedCube.position.x = -1;
   clonedCube.position.y = 0;
-  clonedCube.position.z = 3;
+  clonedCube.position.z = 3.2;
   clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
   scene.add(clonedCube);
 
 }
 
-setInterval(instantiateCube, 2000);
+const instantiateCubeRight = () => {
+  let clonedCube = cube.clone();
+  clonedCube.position.x = 1;
+  clonedCube.position.y = 0;
+  clonedCube.position.z = 3.2;
+  clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+  scene.add(clonedCube);
+
+}
+
+setInterval(() => {
+  let randomNum = Math.ceil(Math.random() * 10);
+  console.log(randomNum);
+  for (let i = 0; i < 10; i++) {
+
+    let j = 5;
+
+    if (randomNum >= 0 && randomNum < 5) {
+      instantiateCubeLeft()
+      console.log("left");
+    }
+    else if (randomNum >= 5 && randomNum < 10) {
+      instantiateCubeRight()
+      console.log("right");
+    }
+    j--
+  }
+
+}, 1000)
+
+
+
+
+
+// const checkSquare = () => {
+//   let currentSquare = instantiateCubeLeft();
+//   if (currentSquare.position.z == 3) {
+//     scene.remove(currentSquare);
+//   }
+
+// }
+
 
 // var animate = function () {
 //   var quaternion = new THREE.Quaternion();
@@ -79,3 +119,23 @@ setInterval(instantiateCube, 2000);
 // };
 
 animate();
+
+// Tuesday
+
+// Player - movability between two lanes (based on keystroke (left/right))
+// Played - 3D-fied
+
+// Enemy - Remove when condition met (z.axis?) or collision (with player)?
+
+// Planes - into infinity? EXTRA
+
+// EXTRAS
+
+// Create array with 10 test words
+// Player - change lane if input === word
+// Player - change word if input !== word
+// Player - add score
+
+// ======================
+// API Fetch - dictionary 
+
