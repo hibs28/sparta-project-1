@@ -1,5 +1,6 @@
 var cubeRotation = 0.0;
 
+
 const initDemo = () => {
   const canvas = document.createElement('canvas');
   document.querySelector('body').appendChild(canvas);
