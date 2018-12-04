@@ -1,5 +1,5 @@
 ///=============================================SETUP OF SCREEN===================================================
-let currentCube;
+let activeR, activeL = false;
 const centerPoint = new THREE.Vector3(0, 0, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -11,7 +11,7 @@ document.body.appendChild(renderer.domElement);
 var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 scene.add(directionalLight);
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
+const geometry = new THREE.BoxGeometry(1, 1, 0.75);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
 
@@ -42,13 +42,33 @@ window.addEventListener('keydown', function (e) {
     console.log("left button presses");
     e.preventDefault();
     cubePlayer.position.set(-1, -0.5, 4);
+    checkPlane();
+    // planeLeft.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
+    activeR = false;
+    activeL = true;
+
   }
   else if (e.key == 'ArrowRight') {
     console.log("right button pressed");
     e.preventDefault();
     cubePlayer.position.set(1, -0.5, 4);
+    checkPlane();
+    activeR = true;
+    activeL = false;
   }
 });
+
+const checkPlane = () => {
+  if (activeR === true) {
+    planeRight.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
+    planeLeft.material = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
+  }
+  else if (activeR == false) {
+
+    planeLeft.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
+    planeRight.material = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
+  }
+}
 
 scene.add(cubePlayer);
 
@@ -62,7 +82,7 @@ const randomColor = () => {
   }
   return hexColor.toString();
 };
-
+let currentCube = cube;
 const instantiateCubeLeft = () => {
   let clonedCube = cube.clone();
   clonedCube.position.x = -1;
@@ -92,7 +112,7 @@ setInterval(() => {
       instantiateCubeLeft()
       //  console.log("left");
     }
-    else if (randomNum >= 5 && randomNum < 10) {
+    else if (randomNum >= 5 && randomNum <= 10) {
       instantiateCubeRight()
       //  console.log("right");
 
@@ -100,26 +120,33 @@ setInterval(() => {
     j--
   }
 
-}, 1000)
+}, 10000)
+
 
 const animate = () => {
   requestAnimationFrame(animate);
   //   cube.rotation.x += 0.01;
   //   cube.rotation.y += 0.01;
 
-  if (currentCube.position.z < 3.2) {
 
-    currentCube.position.z += 0.01
+  currentCube.position.z += 0.001;
+  if (currentCube.position.z >= 3) {
+    //  scene.remove(currentCube);
+    console.log("deleted cube");
   }
-  else if (currentCube.position.z > 3.2) {
-    scene.remove(currentCube);
-
-  }
-  //currentCube.position.z += 0.01;
   renderer.render(scene, camera);
 };
 
 
+// if (currentCube.position.z <
+//  3.2) {
+
+//    //currentCube.position.z += 0.01
+//  }
+// else if (currentCube.position.z > 3.2) {
+//  scene.remove(currentCube);
+
+//}
 
 animate();
 ///=============================================PLAYER CONTROLS===================================================
