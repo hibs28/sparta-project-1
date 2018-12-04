@@ -1,4 +1,4 @@
-/// MAIN SCREEN 
+///=============================================SETUP OF SCREEN===================================================
 const centerPoint = new THREE.Vector3(0, 0, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -13,7 +13,6 @@ scene.add(directionalLight);
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
 
 const geometryPlane = new THREE.PlaneGeometry(5, 5, 4);
 const materialPlane = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
@@ -29,13 +28,6 @@ plane2.rotation.x = 360;
 plane2.translateOnAxis(new THREE.Vector3(1, 0.5, 0.25), 3);
 scene.add(plane2);
 
-// cube.position.copy(geometry);
-// cube.quaternion.copy(geometry);
-// cube.matrixAutoUpdate = false;
-
-
-
-
 camera.position.z = 5;
 
 const animate = () => {
@@ -45,6 +37,9 @@ const animate = () => {
   renderer.render(scene, camera);
 };
 
+animate();
+
+///=============================================INSTANTIATION===================================================
 
 const randomColor = () => {
   const hexValue = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];  //Hexadecimal goes up to 0-9 the A-F
@@ -54,7 +49,6 @@ const randomColor = () => {
   }
   return hexColor.toString();
 };
-
 
 const instantiateCubeLeft = () => {
   let clonedCube = cube.clone();
@@ -85,20 +79,30 @@ setInterval(() => {
 
     if (randomNum >= 0 && randomNum < 5) {
       instantiateCubeLeft()
-      console.log("left");
+      //  console.log("left");
     }
     else if (randomNum >= 5 && randomNum < 10) {
       instantiateCubeRight()
-      console.log("right");
+      //  console.log("right");
     }
     j--
   }
 
 }, 1000)
 
+///=============================================PLAYER CONTROLS===================================================
 
+window.addEventListener('keydown', function (e) {
+  if (e.key == 'ArrowLeft') {
+    console.log("left button presses");
+    e.preventDefault();
+  }
+ else if (e.key== 'ArrowRight') {
+    console.log("right button pressed")
+    e.preventDefault();
 
-
+  }
+});
 
 // const checkSquare = () => {
 //   let currentSquare = instantiateCubeLeft();
@@ -109,16 +113,6 @@ setInterval(() => {
 // }
 
 
-// var animate = function () {
-//   var quaternion = new THREE.Quaternion();
-//   quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-
-//   var vector = new THREE.Vector3(1, 0, 0);
-//   vector.applyQuaternion(quaternion);
-//   cube.quaternion.slerp(endQuaternion, 0.01);
-// };
-
-animate();
 
 // Tuesday
 
@@ -138,4 +132,6 @@ animate();
 
 // ======================
 // API Fetch - dictionary 
+
+
 
