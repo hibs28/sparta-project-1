@@ -14,21 +14,42 @@ const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
 
-const geometryPlane = new THREE.PlaneGeometry(5, 5, 4);
-const materialPlane = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
-const plane = new THREE.Mesh(geometryPlane, materialPlane);
-plane.rotation.x = 360;
-plane.translateOnAxis(new THREE.Vector3(-1, 0.5, 0.25), 3);
-scene.add(plane);
+const geometryPlaneLeft = new THREE.PlaneGeometry(5, 5, 4);
+const materialPlaneLeft = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
+const planeLeft = new THREE.Mesh(geometryPlaneLeft, materialPlaneLeft);
+planeLeft.rotation.x = 360;
+planeLeft.translateOnAxis(new THREE.Vector3(-1, 0.5, 0.25), 3);
+scene.add(planeLeft);
 
-const geometryPlane2 = new THREE.PlaneGeometry(5, 5, 4);
-const materialPlane2 = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
-const plane2 = new THREE.Mesh(geometryPlane2, materialPlane2);
-plane2.rotation.x = 360;
-plane2.translateOnAxis(new THREE.Vector3(1, 0.5, 0.25), 3);
-scene.add(plane2);
+const geometryPlaneRight = new THREE.PlaneGeometry(5, 5, 4);
+const materialPlaneRight = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
+const planeRight = new THREE.Mesh(geometryPlaneRight, materialPlaneRight);
+planeRight.rotation.x = 360;
+planeRight.translateOnAxis(new THREE.Vector3(1, 0.5, 0.25), 3);
+scene.add(planeRight);
 
 camera.position.z = 5;
+
+//================================================PLAYER GEOMETRY=================================================
+const geometryPlayer = new THREE.BoxGeometry(1.5, 0.1, 0.05);
+const materialPlayer = new THREE.MeshBasicMaterial({ color: 0x522C04 });
+const cubePlayer = new THREE.Mesh(geometryPlayer, materialPlayer);
+//cubePlayer.translateOnAxis(new THREE.Vector3(-0.275, -0.07, 1.538), 3);
+
+window.addEventListener('keydown', function (e) {
+  if (e.key == 'ArrowLeft') {
+    console.log("left button presses");
+    e.preventDefault();
+    cubePlayer.position.set(-1, -0.5, 4);
+  }
+  else if (e.key == 'ArrowRight') {
+    console.log("right button pressed");
+    e.preventDefault();
+    cubePlayer.position.set(1, -0.5, 4);
+  }
+});
+
+scene.add(cubePlayer);
 
 const animate = () => {
   requestAnimationFrame(animate);
@@ -92,17 +113,6 @@ setInterval(() => {
 
 ///=============================================PLAYER CONTROLS===================================================
 
-window.addEventListener('keydown', function (e) {
-  if (e.key == 'ArrowLeft') {
-    console.log("left button presses");
-    e.preventDefault();
-  }
- else if (e.key== 'ArrowRight') {
-    console.log("right button pressed")
-    e.preventDefault();
-
-  }
-});
 
 // const checkSquare = () => {
 //   let currentSquare = instantiateCubeLeft();
