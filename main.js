@@ -1,4 +1,5 @@
 ///=============================================SETUP OF SCREEN===================================================
+let currentCube;
 const centerPoint = new THREE.Vector3(0, 0, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -51,15 +52,6 @@ window.addEventListener('keydown', function (e) {
 
 scene.add(cubePlayer);
 
-const animate = () => {
-  requestAnimationFrame(animate);
-  //   cube.rotation.x += 0.01;
-  //   cube.rotation.y += 0.01;
-  renderer.render(scene, camera);
-};
-
-animate();
-
 ///=============================================INSTANTIATION===================================================
 
 const randomColor = () => {
@@ -78,19 +70,17 @@ const instantiateCubeLeft = () => {
   clonedCube.position.z = 3.2;
   clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
   scene.add(clonedCube);
-
 }
 
 const instantiateCubeRight = () => {
   let clonedCube = cube.clone();
   clonedCube.position.x = 1;
   clonedCube.position.y = 0;
-  clonedCube.position.z = 3.2;
+  clonedCube.position.z = 2.2;
   clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+  currentCube = clonedCube;
   scene.add(clonedCube);
-
 }
-
 setInterval(() => {
   let randomNum = Math.ceil(Math.random() * 10);
   console.log(randomNum);
@@ -105,12 +95,33 @@ setInterval(() => {
     else if (randomNum >= 5 && randomNum < 10) {
       instantiateCubeRight()
       //  console.log("right");
+
     }
     j--
   }
 
 }, 1000)
 
+const animate = () => {
+  requestAnimationFrame(animate);
+  //   cube.rotation.x += 0.01;
+  //   cube.rotation.y += 0.01;
+
+  if (currentCube.position.z < 3.2) {
+
+    currentCube.position.z += 0.01
+  }
+  else if (currentCube.position.z > 3.2) {
+    scene.remove(currentCube);
+
+  }
+  //currentCube.position.z += 0.01;
+  renderer.render(scene, camera);
+};
+
+
+
+animate();
 ///=============================================PLAYER CONTROLS===================================================
 
 
