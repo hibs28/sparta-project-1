@@ -11,9 +11,23 @@ document.body.appendChild(renderer.domElement);
 var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 scene.add(directionalLight);
 
+//==========================================BOX CREATION===========================================================
 const geometry = new THREE.BoxGeometry(1, 1, 0.75);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
+
+const intialSetCube = [];
+const cubesOnScreen = [];
+
+for (let i = 0; i < 10; i++) {
+  cube.position.x = -1;
+  cube.position.y = 0;
+  cube.position.z = 1;
+  intialSetCube.push(cube);
+}
+
+//==================================================================================================================
+
 
 const geometryPlaneLeft = new THREE.PlaneGeometry(5, 5, 4);
 const materialPlaneLeft = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
@@ -38,7 +52,7 @@ const cubePlayer = new THREE.Mesh(geometryPlayer, materialPlayer);
 //cubePlayer.translateOnAxis(new THREE.Vector3(-0.275, -0.07, 1.538), 3);
 
 window.addEventListener('keydown', function (e) {
-  if (e.key == 'ArrowLeft') {
+  if (e.key == 'ArrowLeft' && activeL === false) {
     console.log("left button presses");
     e.preventDefault();
     cubePlayer.position.set(-1, -0.5, 4);
@@ -48,7 +62,7 @@ window.addEventListener('keydown', function (e) {
     activeL = true;
 
   }
-  else if (e.key == 'ArrowRight') {
+  else if (e.key == 'ArrowRight' && activeR === false) {
     console.log("right button pressed");
     e.preventDefault();
     cubePlayer.position.set(1, -0.5, 4);
@@ -82,61 +96,65 @@ const randomColor = () => {
   }
   return hexColor.toString();
 };
-let currentCube = cube;
+
 const instantiateCubeLeft = () => {
-  let clonedCube = cube.clone();
-  clonedCube.position.x = -1;
-  clonedCube.position.y = 0;
-  clonedCube.position.z = 3.2;
-  clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-  scene.add(clonedCube);
+  intialSetCube[0].position.x = -1;
+  intialSetCube[0].material = new THREE.MeshBasicMaterial({ color: randomColor() });
+  cubesOnScreen.push(intialSetCube[0]);
 }
 
 const instantiateCubeRight = () => {
-  let clonedCube = cube.clone();
-  clonedCube.position.x = 1;
-  clonedCube.position.y = 0;
-  clonedCube.position.z = 2.2;
-  clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-  currentCube = clonedCube;
-  scene.add(clonedCube);
+  intialSetCube[0].position.x = 1;
+  intialSetCube[0].material = new THREE.MeshBasicMaterial({ color: randomColor() });
+  cubesOnScreen.push(intialSetCube[0]);
 }
 setInterval(() => {
   let randomNum = Math.ceil(Math.random() * 10);
   console.log(randomNum);
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < intialSetCube.length; i++) {
 
-    let j = 5;
+    /*
+    * Params for left/right
+    * @boolean left = true
+    * @boolean right = false
+    */
 
     if (randomNum >= 0 && randomNum < 5) {
       instantiateCubeLeft()
+      scene.add(cubesOnScreen[i]);
       //  console.log("left");
     }
     else if (randomNum >= 5 && randomNum <= 10) {
       instantiateCubeRight()
+      scene.add(cubesOnScreen[i]);
       //  console.log("right");
 
     }
-    j--
   }
-
 }, 10000)
 
 
+
+const Movement = () => {
+  if (cubesOnScreen[0].position.z < 3) {
+    console.log("clone " + cubesOnScreen[0] + "is moving");
+    let zValue = + 0.001;
+    cubesOnScreen[0].translateZ(zValue);
+  }
+  else if (cubesOnScreen[0].position.z >= 3) {
+    cubesOnScreen.pop(0);
+    console.log("deleted cube");
+
+  }
+
+}
 const animate = () => {
   requestAnimationFrame(animate);
   //   cube.rotation.x += 0.01;
   //   cube.rotation.y += 0.01;
-
-
-  currentCube.position.z += 0.001;
-  if (currentCube.position.z >= 3) {
-    //  scene.remove(currentCube);
-    console.log("deleted cube");
-  }
+  Movement();
   renderer.render(scene, camera);
 };
-
 
 // if (currentCube.position.z <
 //  3.2) {
@@ -149,7 +167,7 @@ const animate = () => {
 //}
 
 animate();
-///=============================================PLAYER CONTROLS===================================================
+    ///=============================================PLAYER CONTROLS===================================================
 
 
 // const checkSquare = () => {
