@@ -98,18 +98,14 @@ const randomColor = () => {
 };
 
 const instantiateCubeLeft = () => {
-  intialSetCube[0].position.x = -1;
-  intialSetCube[0].material = new THREE.MeshBasicMaterial({ color: randomColor() });
   cubesOnScreen.push(intialSetCube[0]);
 }
 
 const instantiateCubeRight = () => {
-  intialSetCube[0].position.x = 1;
-  intialSetCube[0].material = new THREE.MeshBasicMaterial({ color: randomColor() });
   cubesOnScreen.push(intialSetCube[0]);
 }
+let randomNum = Math.ceil(Math.random() * 10);
 setInterval(() => {
-  let randomNum = Math.ceil(Math.random() * 10);
   console.log(randomNum);
   for (let i = 0; i < intialSetCube.length; i++) {
 
@@ -120,12 +116,16 @@ setInterval(() => {
     */
 
     if (randomNum >= 0 && randomNum < 5) {
-      instantiateCubeLeft()
+      instantiateCubeLeft(i)
+      cubesOnScreen[i].position.x = -1;
+      cubesOnScreen[i].material = new THREE.MeshBasicMaterial({ color: randomColor() });
       scene.add(cubesOnScreen[i]);
       //  console.log("left");
     }
     else if (randomNum >= 5 && randomNum <= 10) {
-      instantiateCubeRight()
+      instantiateCubeRight(i)
+      cubesOnScreen[i].position.x = 1;
+      cubesOnScreen[i].material = new THREE.MeshBasicMaterial({ color: randomColor() });
       scene.add(cubesOnScreen[i]);
       //  console.log("right");
 
@@ -142,6 +142,7 @@ const Movement = () => {
     cubesOnScreen[0].translateZ(zValue);
   }
   else if (cubesOnScreen[0].position.z >= 3) {
+    scene.remove(cubesOnScreen[0])
     cubesOnScreen.pop(0);
     console.log("deleted cube");
 
