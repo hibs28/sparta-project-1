@@ -10,20 +10,27 @@ document.body.appendChild(renderer.domElement);
 
 var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 scene.add(directionalLight);
-
+let zValue = 0;
+let currentCube = false;
 //==========================================BOX CREATION===========================================================
 const geometry = new THREE.BoxGeometry(1, 1, 0.75);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
 
-const intialSetCube = [];
+//const intialSetCube = [];
 const cubesOnScreen = [];
+const randomNumArr = [];
+//push random number to game
+//switching lanes 
+// creating new objects  <--- random number
 
 for (let i = 0; i < 10; i++) {
-  cube.position.x = -1;
-  cube.position.y = 0;
-  cube.position.z = 1;
-  intialSetCube.push(cube);
+  // cube.position.x = -1;
+  // cube.position.y = 0;
+  // cube.position.z = 1;
+  // cubesOnScreen.push(cube);
+  randomNum = Math.ceil(Math.random() * 10);
+  randomNumArr.push(randomNum);
 }
 
 //==================================================================================================================
@@ -50,6 +57,10 @@ const geometryPlayer = new THREE.BoxGeometry(1.5, 0.1, 0.05);
 const materialPlayer = new THREE.MeshBasicMaterial({ color: 0x522C04 });
 const cubePlayer = new THREE.Mesh(geometryPlayer, materialPlayer);
 //cubePlayer.translateOnAxis(new THREE.Vector3(-0.275, -0.07, 1.538), 3);
+
+///===============================================================================================================
+///=============================================PLAYER CONTROLS===================================================
+
 
 window.addEventListener('keydown', function (e) {
   if (e.key == 'ArrowLeft' && activeL === false) {
@@ -85,8 +96,8 @@ const checkPlane = () => {
 }
 
 scene.add(cubePlayer);
-
-///=============================================INSTANTIATION===================================================
+///===============================================================================================================
+///=============================================INSTANTIATION=====================================================
 
 const randomColor = () => {
   const hexValue = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];  //Hexadecimal goes up to 0-9 the A-F
@@ -97,64 +108,76 @@ const randomColor = () => {
   return hexColor.toString();
 };
 
-const instantiateCubeLeft = () => {
-  cubesOnScreen.push(intialSetCube[0]);
+// const instantiateCubeLeft = () => {
+//   //cubesOnScreen.push(intialSetCube[0]);
+// }
+
+// const instantiateCubeRight = () => {
+//   //cubesOnScreen.push(intialSetCube[0]);
+// }
+
+const setLaneRight = () => {
+  cube.position.x = 1;
+  cube.position.y = 0;
+  cube.position.z = 1;
+  cube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+  cubesOnScreen.push(cube);
+  console.log(cubesOnScreen);
+
+}
+const setLaneLeft = () => {
+  cube.position.x = -1;
+  cube.position.y = 0;
+  cube.position.z = 1;
+  cube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+  cubesOnScreen.push(cube);
+
 }
 
-const instantiateCubeRight = () => {
-  cubesOnScreen.push(intialSetCube[0]);
+
+const randomNumChecker = () => {
+  for (let i = 0; i < randomNumArr.length; i++) {
+    if (randomNumArr[i] >= 0 && randomNumArr[i] < 5) {
+      setLaneRight()
+    }
+    else if (randomNumArr[i] >= 5 && randomNumArr[i] <= 10) {
+      setLaneLeft();
+    }
+    Movement(i);
+  }
+
 }
-let randomNum = Math.ceil(Math.random() * 10);
-setInterval(() => {
-  console.log(randomNum);
-  for (let i = 0; i < intialSetCube.length; i++) {
 
-    /*
-    * Params for left/right
-    * @boolean left = true
-    * @boolean right = false
-    */
-
-    if (randomNum >= 0 && randomNum < 5) {
-      instantiateCubeLeft(i)
-      cubesOnScreen[i].position.x = -1;
-      cubesOnScreen[i].material = new THREE.MeshBasicMaterial({ color: randomColor() });
-      scene.add(cubesOnScreen[i]);
-      //  console.log("left");
-    }
-    else if (randomNum >= 5 && randomNum <= 10) {
-      instantiateCubeRight(i)
-      cubesOnScreen[i].position.x = 1;
-      cubesOnScreen[i].material = new THREE.MeshBasicMaterial({ color: randomColor() });
-      scene.add(cubesOnScreen[i]);
-      //  console.log("right");
-
-    }
+const Movement = (i) => {
+  if (cubesOnScreen[i].position.z < 3) {
+    scene.add(cubesOnScreen[i]);
+    zValue = + 0.001;
+    currentCube = true;
   }
-}, 10000)
-
-
-
-const Movement = () => {
-  if (cubesOnScreen[0].position.z < 3) {
-    console.log("clone " + cubesOnScreen[0] + "is moving");
-    let zValue = + 0.001;
-    cubesOnScreen[0].translateZ(zValue);
-  }
-  else if (cubesOnScreen[0].position.z >= 3) {
-    scene.remove(cubesOnScreen[0])
-    cubesOnScreen.pop(0);
+  else if (cubesOnScreen[i].position.z >= 3) {
+    scene.remove(cubesOnScreen[i])
+    cubesOnScreen.pop();
     console.log("deleted cube");
-
+    currentCube = false;
   }
+  randomNumChecker(i);
+
+
+  setInterval(() => {
+    Movement(i);
+    currentCube = true;
+  }, 1000)
+
 
 }
 const animate = () => {
   requestAnimationFrame(animate);
   //   cube.rotation.x += 0.01;
   //   cube.rotation.y += 0.01;
-  Movement();
-  renderer.render(scene, camera);
+  // Movement();
+  if (cubesOnScreen.length > 1) {
+    cubesOnScreen[i].translateZ(zValue);
+  } renderer.render(scene, camera);
 };
 
 // if (currentCube.position.z <
@@ -168,7 +191,6 @@ const animate = () => {
 //}
 
 animate();
-    ///=============================================PLAYER CONTROLS===================================================
 
 
 // const checkSquare = () => {
