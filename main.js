@@ -15,29 +15,69 @@ const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
 
-const geometryPlane = new THREE.PlaneGeometry(5, 5, 4);
-const materialPlane = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
-const plane = new THREE.Mesh(geometryPlane, materialPlane);
-plane.rotation.x = 360;
-plane.translateOnAxis(new THREE.Vector3(-1, 0.5, 0.25), 3);
-scene.add(plane);
+const geometryPlaneLeft = new THREE.PlaneGeometry(5, 5, 4);
+const materialPlaneLeft = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
+const planeLeft = new THREE.Mesh(geometryPlaneLeft, materialPlaneLeft);
+planeLeft.rotation.x = 360;
+planeLeft.translateOnAxis(new THREE.Vector3(-1, 0.5, 0.25), 3);
+scene.add(planeLeft);
 
-const geometryPlane2 = new THREE.PlaneGeometry(5, 5, 4);
-const materialPlane2 = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
-const plane2 = new THREE.Mesh(geometryPlane2, materialPlane2);
-plane2.rotation.x = 360;
-plane2.translateOnAxis(new THREE.Vector3(1, 0.5, 0.25), 3);
-scene.add(plane2);
+const geometryPlaneRight = new THREE.PlaneGeometry(5, 5, 4);
+const materialPlaneRight = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
+const planeRight = new THREE.Mesh(geometryPlaneRight, materialPlaneRight);
+planeRight.rotation.x = 360;
+planeRight.translateOnAxis(new THREE.Vector3(1, 0.5, 0.25), 3);
+scene.add(planeRight);
 
-let isThereLeft = false
-let isThereRight = false
+let activeR = false;
+let activeL = false;
+// booleans for enemies
+let isThereLeft = false;
+let isThereRight = false;
+let newCubeR = new THREE.MeshBasicMaterial;
+let newCubeL = new THREE.MeshBasicMaterial;
 
 // cube.position.copy(geometry);
 // cube.quaternion.copy(geometry);
 // cube.matrixAutoUpdate = false;
+const geometryPlayer = new THREE.BoxGeometry(1.5, 0.1, 0.05);
+const materialPlayer = new THREE.MeshBasicMaterial({ color: 0x522C04 });
+const cubePlayer = new THREE.Mesh(geometryPlayer, materialPlayer);
+
+window.addEventListener('keydown', function (e) {
+  if (e.key == 'ArrowLeft' && activeL === false) {
+    console.log("left button presses");
+    e.preventDefault();
+    cubePlayer.position.set(-1, -0.5, 4);
+    checkPlane();
+    // planeLeft.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
+    activeR = false;
+    activeL = true;
+
+  }
+  else if (e.key == 'ArrowRight' && activeR === false) {
+    console.log("right button pressed");
+    e.preventDefault();
+    cubePlayer.position.set(1, -0.5, 4);
+    checkPlane();
+    activeR = true;
+    activeL = false;
+  }
+});
 
 
+const checkPlane = () => {
+  if (activeR === true) {
+    planeRight.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
+    planeLeft.material = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
+  }
+  else if (activeR == false) {
 
+    planeLeft.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
+    planeRight.material = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
+  }
+}
+scene.add(cubePlayer);
 
 camera.position.z = 5;
 
@@ -48,19 +88,24 @@ const randomColor = () => {
     hexColor += hexValue[(Math.floor(Math.random() * 16))];
   }
   return hexColor.toString();
-};
+}
 
+const deleteCube = (cube) => {
+  scene.remove(cube)
+  cube.geometry.dispose();
+  cube.material.dispose();
+}
 
 const instantiateCubeLeft = () => {
   if (!isThereLeft) {
     let clonedCube = cube.clone();
     clonedCube.position.x = -1;
     clonedCube.position.y = 0;
-    clonedCube.position.z = 3.2;
+    clonedCube.position.z = 0;
     clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+    newCubeL = clonedCube;
     scene.add(clonedCube);
     isThereLeft = true
-
   }
 
 }
@@ -70,13 +115,12 @@ const instantiateCubeRight = () => {
     let clonedCube = cube.clone();
     clonedCube.position.x = 1;
     clonedCube.position.y = 0;
-    clonedCube.position.z = 3.2;
+    clonedCube.position.z = 0;
     clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+    newCubeR = clonedCube;
     scene.add(clonedCube);
     isThereRight = true
-
   }
-
 }
 
 setInterval(() => {
@@ -89,6 +133,7 @@ setInterval(() => {
     if (randomNum >= 0 && randomNum < 5) {
       instantiateCubeLeft()
       console.log("left");
+
     }
     else if (randomNum >= 5 && randomNum < 10) {
       instantiateCubeRight()
@@ -99,11 +144,36 @@ setInterval(() => {
 
 }, 1000)
 
+const MovementR = () => {
+  if (newCubeR.position.z < 6) {
+    let zValue = + 0.01;
+    newCubeR.translateZ(zValue);
+  }
+  else if (newCubeR.position.z >= 6) {
+    isThereRight = false;
+    instantiateCubeRight()
+    deleteCube(newCubeR);
+  }
+}
+const MovementL = () => {
+  if (newCubeL.position.z < 6) {
+    let zValue = + 0.01;
+    console.log(newCubeL.position.z)
+    newCubeL.translateZ(zValue);
+  }
+  else if (newCubeL.position.z >= 6) {
+    isThereLeft = false;
+    instantiateCubeLeft()
+    deleteCube(newCubeL);
 
+  }
+}
 const animate = () => {
   requestAnimationFrame(animate);
   //   cube.rotation.x += 0.01;
   //   cube.rotation.y += 0.01;
+  MovementR();
+  MovementL();
   renderer.render(scene, camera);
 };
 
