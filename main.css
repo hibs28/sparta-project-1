@@ -1,3 +1,21 @@
-body { margin: 0; }
-canvas { width: 90%; height: 90% }
-id { color:white }
+h1{
+float: right;
+margin-right: 250px;
+font-size: 90px;
+color: white;
+}
+
+
+body{
+
+background-color: black;
+}
+
+a{
+  text-decoration: none;
+  color:inherit;
+}
+
+a h1:hover{
+  color: yellow;
+}

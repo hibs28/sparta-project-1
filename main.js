@@ -1,267 +1,319 @@
-/// MAIN SCREEN 
-const centerPoint = new THREE.Vector3(0, 0, 0);
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+var cubeRotation = 0.0;
 
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-
-const geometryPlaneLeft = new THREE.PlaneGeometry(5, 5, 4);
-const materialPlaneLeft = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
-const planeLeft = new THREE.Mesh(geometryPlaneLeft, materialPlaneLeft);
-planeLeft.rotation.x = 360;
-planeLeft.translateOnAxis(new THREE.Vector3(-1, 0.5, 0.25), 3);
-scene.add(planeLeft);
-
-const geometryPlaneRight = new THREE.PlaneGeometry(5, 5, 4);
-const materialPlaneRight = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
-const planeRight = new THREE.Mesh(geometryPlaneRight, materialPlaneRight);
-planeRight.rotation.x = 360;
-planeRight.translateOnAxis(new THREE.Vector3(1, 0.5, 0.25), 3);
-scene.add(planeRight);
-
-let activeR = false;
-let activeL = false;
-// booleans for enemies
-let isThereLeft = false;
-let isThereRight = false;
-let newCubeR = new THREE.MeshBasicMaterial;
-let newCubeL = new THREE.MeshBasicMaterial;
-
-// player thingies
-let health = 100;
-let score = 0
-
-// cube.position.copy(geometry);
-// cube.quaternion.copy(geometry);
-// cube.matrixAutoUpdate = false;
-const geometryPlayer = new THREE.BoxGeometry(1.5, 0.1, 0.05);
-const materialPlayer = new THREE.MeshBasicMaterial({ color: 0x522C04 });
-const cubePlayer = new THREE.Mesh(geometryPlayer, materialPlayer);
-cubePlayer.position.set(1, -0.5, 4);
-
-window.addEventListener('keydown', function (e) {
-  if (e.key == 'ArrowLeft' && activeL === false) {
-    e.preventDefault();
-    cubePlayer.position.set(-1, -0.5, 4);
-    checkPlane();
-    // planeLeft.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
-    activeR = false;
-    activeL = true;
-
+const initDemo = () => {
+  const canvas = document.createElement('canvas');
+  document.querySelector('body').appendChild(canvas);
+  const gl = canvas.getContext('webgl');
+  if (!gl) {
+    console.log("WebGl not supported, falling back on experimental WebGL");
+    gl = canvas.getContext('experimental-gl');
   }
-  else if (e.key == 'ArrowRight' && activeR === false) {
-    e.preventDefault();
-    cubePlayer.position.set(1, -0.5, 4);
-    checkPlane();
-    activeR = true;
-    activeL = false;
+
+  if (!gl) {
+    alert("Your browser does not support WebGL")
   }
-});
+  // canvas.width = window.innerWidth;
+  // canvas.height = window.innerHeight;
+  // gl.viewport(0, 0, window.innerWidth, window.innerHeight);
 
 
-const checkPlane = () => {
-  if (activeR === true) {
-    planeRight.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
-    planeLeft.material = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
+  canvas.height = 600;
+  canvas.width = 700;
+  gl.viewport(0, 0, 800, 600);
+
+  const vsSource = `
+  attribute vec4 aVertexPosition;
+  attribute vec4 aVertexColor;
+  uniform mat4 uModelViewMatrix;
+  uniform mat4 uProjectionMatrix;
+  varying lowp vec4 vColor;
+  void main(void) {
+    gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+    vColor = aVertexColor;
   }
-  else if (activeR == false) {
+`;
 
-    planeLeft.material = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
-    planeRight.material = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
+  const fsSource = `
+  varying lowp vec4 vColor;
+  void main(void) {
+    gl_FragColor = vColor;
   }
-}
-scene.add(cubePlayer);
+`;
 
-camera.position.z = 5;
+  const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+  const programInfo = {
+    program: shaderProgram,
+    attribLocations: {
+      vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+      vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+    },
+    uniformLocations: {
+      projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+      modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+    },
+  };
 
-const randomColor = () => {
-  const hexValue = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];  //Hexadecimal goes up to 0-9 the A-F
-  let hexColor = "#";
-  for (let i = 0; i < 6; i++) { //loops 6 times
-    hexColor += hexValue[(Math.floor(Math.random() * 16))];
+  const buffers = initBuffers(gl);
+
+  var then = 0;
+
+  // repeats draw scene
+  function render(now) {
+    now *= 0.001;  // convert to seconds
+    const deltaTime = now - then;
+    then = now;
+
+    drawScene(gl, programInfo, buffers, deltaTime);
+
+    requestAnimationFrame(render);
   }
-  return hexColor.toString();
+  requestAnimationFrame(render);
 }
 
-const deleteCube = (cube) => {
-  scene.remove(cube)
-  cube.geometry.dispose();
-  cube.material.dispose();
+function initBuffers(gl) {
+
+  //buffer for the cube 
+  const positionBuffer = gl.createBuffer();
+
+  // Select the positionBuffer as the one to apply buffer
+  // operations to from here out.
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+  //aray of cube positons
+  const positions = [
+    // Front face
+    -1.0, -1.0, 1.0,
+    1.0, -1.0, 1.0,
+    1.0, 1.0, 1.0,
+    -1.0, 1.0, 1.0,
+
+    // Back face
+    -1.0, -1.0, -1.0,
+    -1.0, 1.0, -1.0,
+    1.0, 1.0, -1.0,
+    1.0, -1.0, -1.0,
+
+    // Top face
+    -1.0, 1.0, -1.0,
+    -1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0,
+    1.0, 1.0, -1.0,
+
+    // Bottom face
+    -1.0, -1.0, -1.0,
+    1.0, -1.0, -1.0,
+    1.0, -1.0, 1.0,
+    -1.0, -1.0, 1.0,
+
+    // Right face
+    1.0, -1.0, -1.0,
+    1.0, 1.0, -1.0,
+    1.0, 1.0, 1.0,
+    1.0, -1.0, 1.0,
+
+    // Left face
+    -1.0, -1.0, -1.0,
+    -1.0, -1.0, 1.0,
+    -1.0, 1.0, 1.0,
+    -1.0, 1.0, -1.0,
+  ];
+
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+  //set colors of the faces
+
+  const faceColors = [
+    [1.0, 1.0, 1.0, 1.0],    // Front face: white
+    [1.0, 0.0, 0.0, 1.0],    // Back face: red
+    [0.0, 1.0, 0.0, 1.0],    // Top face: green
+    [0.0, 0.0, 1.0, 1.0],    // Bottom face: blue
+    [1.0, 1.0, 0.0, 1.0],    // Right face: yellow
+    [1.0, 0.0, 1.0, 1.0],    // Left face: purple
+  ];
+
+  // Convert the array of colors into a table for all the vertices.
+
+  var colors = [];
+
+  for (var j = 0; j < faceColors.length; ++j) {
+    const c = faceColors[j];
+
+    //repear 4x for 4 vertices (1 square = 4 vertices)
+    colors = colors.concat(c, c, c, c);
+  }
+
+  const colorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+  // Build the element array buffer; this specifies the indices
+  // into the vertex arrays for each face's vertices.
+
+  const indexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+  //webgl draws triangles so this is an array of the triangles positions 
+  const indices = [
+    0, 1, 2, 0, 2, 3,    // front
+    4, 5, 6, 4, 6, 7,    // back
+    8, 9, 10, 8, 10, 11,   // top
+    12, 13, 14, 12, 14, 15,   // bottom
+    16, 17, 18, 16, 18, 19,   // right
+    20, 21, 22, 20, 22, 23,   // left
+  ];
+
+  // Now send the element array to GL
+
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(indices), gl.STATIC_DRAW);
+
+  return {
+    position: positionBuffer,
+    color: colorBuffer,
+    indices: indexBuffer,
+  };
 }
 
-const instantiateCubeLeft = () => {
-  if (!isThereLeft) {
-    let clonedCube = cube.clone();
-    clonedCube.position.x = -1;
-    clonedCube.position.y = 0;
-    clonedCube.position.z = 0;
-    clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-    newCubeL = clonedCube;
-    scene.add(clonedCube);
-    isThereLeft = true
+//
+// Draw the scene.
+//
+function drawScene(gl, programInfo, buffers, deltaTime) {
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);  // set's color
+  gl.clearDepth(1.0);                 // Clear everything
+  gl.enable(gl.DEPTH_TEST);           // Enable depth testing (3d)
+  gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+
+  // Clear the canvas before we start drawing on it.
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // Create a perspective matrix
+
+  const fieldOfView = 60 * Math.PI / 180;   // in radians
+  const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;  /// client height and width is the space in the body excluding the scroll bar, margin, border
+  const zNear = 0.1;
+  const zFar = 100.0;
+  const projectionMatrix = glMatrix.mat4.create();
+
+  glMatrix.mat4.perspective(projectionMatrix,
+    fieldOfView,
+    aspect,
+    zNear,
+    zFar);
+
+  //identity center point 
+  const modelViewMatrix = glMatrix.mat4.create();
+
+
+  glMatrix.mat4.translate(modelViewMatrix,     // destination matrix
+    modelViewMatrix,     // matrix to translate
+    [-0.0, 0.0, -6.0]);  // amount to translate
+  glMatrix.mat4.rotate(modelViewMatrix,  // destination matrix
+    modelViewMatrix,  // matrix to rotate
+    cubeRotation,     // amount to rotate in radians
+    [1, 0, 1]);       // axis to rotate around (Z)
+
+
+  // Tell WebGL how to pull out the positions from the position
+  // buffer into the vertexPosition attribute
+  {
+    const numComponents = 3;
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+    gl.vertexAttribPointer(
+      programInfo.attribLocations.vertexPosition,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+    gl.enableVertexAttribArray(
+      programInfo.attribLocations.vertexPosition);
   }
 
+  //get the color buffer into the vertexColor
+  {
+    const numComponents = 4;  // x,y,x,
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+    gl.vertexAttribPointer(
+      programInfo.attribLocations.vertexColor,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+    gl.enableVertexAttribArray(
+      programInfo.attribLocations.vertexColor);
+  }
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
+  gl.useProgram(programInfo.program);
+
+  //shader uniform
+  gl.uniformMatrix4fv(
+    programInfo.uniformLocations.projectionMatrix,
+    false,
+    projectionMatrix);
+  gl.uniformMatrix4fv(
+    programInfo.uniformLocations.modelViewMatrix,
+    false,
+    modelViewMatrix);
+
+  {
+    const vertexCount = 36;
+    const type = gl.UNSIGNED_SHORT;
+    const offset = 0;
+    gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+  }
+  //update rotation
+
+  cubeRotation += deltaTime;
 }
 
-const instantiateCubeRight = () => {
-  if (!isThereRight) {
-    let clonedCube = cube.clone();
-    clonedCube.position.x = 1;
-    clonedCube.position.y = 0;
-    clonedCube.position.z = 0;
-    clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-    newCubeR = clonedCube;
-    scene.add(clonedCube);
-    isThereRight = true
+//shader program
+function initShaderProgram(gl, vsSource, fsSource) {
+  const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
+  const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+
+
+  const shaderProgram = gl.createProgram();
+  gl.attachShader(shaderProgram, vertexShader);
+  gl.attachShader(shaderProgram, fragmentShader);
+  gl.linkProgram(shaderProgram);
+
+  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+    alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+    return null;
   }
+
+  return shaderProgram;
 }
 
-setInterval(() => {
-  let randomNum = Math.ceil(Math.random() * 10);
-  for (let i = 0; i < 10; i++) {
+//compiles shader
+function loadShader(gl, type, source) {
+  const shader = gl.createShader(type);
 
 
-    if (randomNum >= 0 && randomNum < 5) {
-      instantiateCubeLeft()
+  gl.shaderSource(shader, source);
 
-    }
-    else if (randomNum >= 5 && randomNum < 10) {
-      instantiateCubeRight()
-    }
+
+  gl.compileShader(shader);
+
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
   }
 
-}, 1000)
-
-const MovementR = () => {
-  if (newCubeR.position.z < 6) {
-    let zValue = + 0.01;
-    newCubeR.translateZ(zValue);
-    isThereRight = true;
-
-    if (newCubeR.position.z >= 3.2 && newCubeR.position.z <= 3.9 && activeR === true) {
-      health -= 1;
-
-    }
-    else if (newCubeR.position.z >= 3.2 && newCubeR.position.z <= 3.9 && activeL === true) {
-      score += 10;
-    }
-
-  }
-  else if (newCubeR.position.z >= 6) {
-    isThereRight = false;
-  }
+  return shader;
 }
-const MovementL = () => {
-  if (newCubeL.position.z < 6) {
-    let zValue = + 0.01;
-    newCubeL.translateZ(zValue);
-    isThereRight = true;
-
-    if (newCubeL.position.z >= 3.2 && newCubeL.position.z <= 3.9 && activeL === true) {
-      health -= 1;
-
-    }
-    else if (newCubeL.position.z >= 3.2 && newCubeL.position.z <= 3.9 && activeR === true) {
-      score += 10;
-    }
-  }
-  else if (newCubeL.position.z >= 6) {
-    isThereLeft = false;
-  }
-}
-
-const winCondition = () => {
-  if (newCubeR.position.z <= 3.2 && activeR === true) {
-    health -= 0.1;
-
-  }
-  else if (newCubeR.position.z <= 3.2 && activeL === true) {
-    score += 10;
-  }
-  else if (newCubeL.position.z <= 3.2 && activeL === true) {
-    health -= 0.1;
-
-  }
-  else if (newCubeL.position.z <= 3.2 && activeR === true) {
-    score += 10;
-  }
-}
-const showPoints = () => {
-  const text2 = document.createElement('div');
-  text2.style.position = 'absolute';
-  //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
-  text2.style.width = 100;
-  text2.style.height = 100;
-  text2.style.backgroundColor = "blue";
-  text2.innerHTML = "Score: " + score + " Health: " + health;
-  text2.style.top = 200 + 'px';
-  text2.style.left = 200 + 'px';
-  document.body.appendChild(text2);
-}
-
-const animate = () => {
-  requestAnimationFrame(animate);
-  //   cube.rotation.x += 0.01;
-  //   cube.rotation.y += 0.01;
-  MovementR();
-  MovementL();
-  showPoints();
-  //winCondition();
-
-  console.log("score" + score + " Health" + health);
-  if (health <= 0) {
-    alert("you died");
-    window.close();
-  }
-  geometry.computeBoundingBox();
-
-  renderer.render(scene, camera);
-
-};
-
-// const checkSquare = () => {
-//   let currentSquare = instantiateCubeLeft();
-//   if (currentSquare.position.z == 3) {
-//     scene.remove(currentSquare);
-//   }
-
-// }
-
-
-// var animate = function () {
-//   var quaternion = new THREE.Quaternion();
-//   quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-
-//   var vector = new THREE.Vector3(1, 0, 0);
-//   vector.applyQuaternion(quaternion);
-//   cube.quaternion.slerp(endQuaternion, 0.01);
-// };
-
-animate();
-
-// Tuesday
-
-// Player - movability between two lanes (based on keystroke (left/right))
-// Played - 3D-fied
-
-// Enemy - Remove when condition met (z.axis?) or collision (with player)?
-
-// Planes - into infinity? EXTRA
-
-// EXTRAS
-
-// Create array with 10 test words
-// Player - change lane if input === word
-// Player - change word if input !== word
-// Player - add score
-
-// ======================
-// API Fetch - dictionary 
-
