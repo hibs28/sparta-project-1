@@ -29,6 +29,9 @@ plane2.rotation.x = 360;
 plane2.translateOnAxis(new THREE.Vector3(1, 0.5, 0.25), 3);
 scene.add(plane2);
 
+let isThereLeft = false
+let isThereRight = false
+
 // cube.position.copy(geometry);
 // cube.quaternion.copy(geometry);
 // cube.matrixAutoUpdate = false;
@@ -37,14 +40,6 @@ scene.add(plane2);
 
 
 camera.position.z = 5;
-
-const animate = () => {
-  requestAnimationFrame(animate);
-  //   cube.rotation.x += 0.01;
-  //   cube.rotation.y += 0.01;
-  renderer.render(scene, camera);
-};
-
 
 const randomColor = () => {
   const hexValue = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];  //Hexadecimal goes up to 0-9 the A-F
@@ -57,22 +52,30 @@ const randomColor = () => {
 
 
 const instantiateCubeLeft = () => {
-  let clonedCube = cube.clone();
-  clonedCube.position.x = -1;
-  clonedCube.position.y = 0;
-  clonedCube.position.z = 3.2;
-  clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-  scene.add(clonedCube);
+  if (!isThereLeft) {
+    let clonedCube = cube.clone();
+    clonedCube.position.x = -1;
+    clonedCube.position.y = 0;
+    clonedCube.position.z = 3.2;
+    clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+    scene.add(clonedCube);
+    isThereLeft = true
+
+  }
 
 }
 
 const instantiateCubeRight = () => {
-  let clonedCube = cube.clone();
-  clonedCube.position.x = 1;
-  clonedCube.position.y = 0;
-  clonedCube.position.z = 3.2;
-  clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-  scene.add(clonedCube);
+  if (!isThereRight) {
+    let clonedCube = cube.clone();
+    clonedCube.position.x = 1;
+    clonedCube.position.y = 0;
+    clonedCube.position.z = 3.2;
+    clonedCube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
+    scene.add(clonedCube);
+    isThereRight = true
+
+  }
 
 }
 
@@ -97,7 +100,12 @@ setInterval(() => {
 }, 1000)
 
 
-
+const animate = () => {
+  requestAnimationFrame(animate);
+  //   cube.rotation.x += 0.01;
+  //   cube.rotation.y += 0.01;
+  renderer.render(scene, camera);
+};
 
 
 // const checkSquare = () => {
