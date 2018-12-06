@@ -140,15 +140,14 @@ setInterval(() => {
 
 const MovementR = () => {
   if (newCubeR.position.z < 6) {
-    let zValue = + 0.01;
+    let zValue = + 0.05;
     newCubeR.translateZ(zValue);
     isThereRight = true;
-
-    if (newCubeR.position.z >= 3.2 && newCubeR.position.z <= 3.9 && activeR === true) {
+    if (newCubeR.position.z >= 3.2 && newCubeR.position.z <= 4 && activeR === true) {
       health -= 1;
 
     }
-    else if (newCubeR.position.z >= 3.2 && newCubeR.position.z <= 3.9 && activeL === true) {
+    else if (newCubeR.position.z >= 3.2 && newCubeR.position.z <= 4 && activeL === true) {
       score += 10;
     }
 
@@ -159,15 +158,15 @@ const MovementR = () => {
 }
 const MovementL = () => {
   if (newCubeL.position.z < 6) {
-    let zValue = + 0.01;
+    let zValue = + 0.05;
     newCubeL.translateZ(zValue);
     isThereRight = true;
 
-    if (newCubeL.position.z >= 3.2 && newCubeL.position.z <= 3.9 && activeL === true) {
+    if (newCubeL.position.z >= 3.2 && newCubeL.position.z <= 4 && activeL === true) {
       health -= 1;
 
     }
-    else if (newCubeL.position.z >= 3.2 && newCubeL.position.z <= 3.9 && activeR === true) {
+    else if (newCubeL.position.z >= 3.2 && newCubeL.position.z <= 4 && activeR === true) {
       score += 10;
     }
   }
