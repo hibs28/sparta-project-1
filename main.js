@@ -13,25 +13,24 @@ scene.add(directionalLight);
 let zValue = 0;
 let currentCube = false;
 //==========================================BOX CREATION===========================================================
-const geometry = new THREE.BoxGeometry(1, 1, 0.75);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
+// const geometry = new THREE.BoxGeometry(1, 1, 0.75);
+// const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+// const cube = new THREE.Mesh(geometry, material);
+const randomColor = () => {
+  const hexValue = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];  //Hexadecimal goes up to 0-9 the A-F
+  let hexColor = "#";
+  for (let i = 0; i < 6; i++) { //loops 6 times
+    hexColor += hexValue[(Math.floor(Math.random() * 16))];
+  }
+  return hexColor.toString();
+};
+
 
 //const intialSetCube = [];
-const cubesOnScreen = [];
-const randomNumArr = [];
 //push random number to game
 //switching lanes 
 // creating new objects  <--- random number
 
-for (let i = 0; i < 10; i++) {
-  // cube.position.x = -1;
-  // cube.position.y = 0;
-  // cube.position.z = 1;
-  // cubesOnScreen.push(cube);
-  randomNum = Math.ceil(Math.random() * 10);
-  randomNumArr.push(randomNum);
-}
 
 //==================================================================================================================
 
@@ -94,19 +93,10 @@ const checkPlane = () => {
     planeRight.material = new THREE.MeshBasicMaterial({ color: 0xC27BA0, side: THREE.DoubleSide });
   }
 }
-
 scene.add(cubePlayer);
 ///===============================================================================================================
 ///=============================================INSTANTIATION=====================================================
 
-const randomColor = () => {
-  const hexValue = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];  //Hexadecimal goes up to 0-9 the A-F
-  let hexColor = "#";
-  for (let i = 0; i < 6; i++) { //loops 6 times
-    hexColor += hexValue[(Math.floor(Math.random() * 16))];
-  }
-  return hexColor.toString();
-};
 
 // const instantiateCubeLeft = () => {
 //   //cubesOnScreen.push(intialSetCube[0]);
@@ -116,69 +106,80 @@ const randomColor = () => {
 //   //cubesOnScreen.push(intialSetCube[0]);
 // }
 
-const setLaneRight = () => {
-  cube.position.x = 1;
-  cube.position.y = 0;
-  cube.position.z = 1;
-  cube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-  cubesOnScreen.push(cube);
-  console.log(cubesOnScreen);
 
+const Cube = () => {
+  const geo = new THREE.BoxGeometry(1, 1, 0.75)
+  const mat = new THREE.MeshBasicMaterial({
+    color: randomColor()
+  })
+  const cube = new THREE.Mesh(geo, mat)
+  return cube
+}
+const setLaneRight = () => {
+  let newCube = Cube()
+  newCube.position.x = 1;
+  newCube.position.y = 0;
+  newCube.position.z = 1;
+  return newCube;
 }
 const setLaneLeft = () => {
-  cube.position.x = -1;
-  cube.position.y = 0;
-  cube.position.z = 1;
-  cube.material = new THREE.MeshBasicMaterial({ color: randomColor() });
-  cubesOnScreen.push(cube);
-
+  let newCube = Cube()
+  newCube.position.x = -1;
+  newCube.position.y = 0;
+  newCube.position.z = 1;
+  return newCube;
 }
 
-
-const randomNumChecker = () => {
-  for (let i = 0; i < randomNumArr.length; i++) {
-    if (randomNumArr[i] >= 0 && randomNumArr[i] < 5) {
-      setLaneRight()
+const onScreen = () => {
+  for (let i = 0; i < 10; i++) {
+    randomNum = Math.ceil(Math.random() * 10);
+    if (randomNum < 6) {
+      let cubeL = setLaneLeft()
+      scene.add(cubeL);
+    } else {
+      let cubeR = setLaneRight()
+      scene.add(cubeR);
     }
-    else if (randomNumArr[i] >= 5 && randomNumArr[i] <= 10) {
-      setLaneLeft();
-    }
-    Movement(i);
   }
-
 }
 
-const Movement = (i) => {
-  if (cubesOnScreen[i].position.z < 3) {
-    scene.add(cubesOnScreen[i]);
-    zValue = + 0.001;
-    currentCube = true;
-  }
-  else if (cubesOnScreen[i].position.z >= 3) {
-    scene.remove(cubesOnScreen[i])
-    cubesOnScreen.pop();
-    console.log("deleted cube");
-    currentCube = false;
-  }
-  randomNumChecker(i);
+const animateRight = (screenCube) => {
+
+  requestAnimationFrame(animateRight);
+  screenCube.translateZ(0.5);
+  renderer.render(scene, camera);
 
 
-  setInterval(() => {
-    Movement(i);
-    currentCube = true;
-  }, 1000)
-
-
-}
-const animate = () => {
-  requestAnimationFrame(animate);
-  //   cube.rotation.x += 0.01;
-  //   cube.rotation.y += 0.01;
-  // Movement();
-  if (cubesOnScreen.length > 1) {
-    cubesOnScreen[i].translateZ(zValue);
-  } renderer.render(scene, camera);
 };
+const animateLeft = (screenCube) => {
+
+  requestAnimationFrame(animateLeft);
+  screenCube.translateZ(0.5);
+  renderer.render(scene, camera);
+
+};
+
+
+
+
+const movementCube = () => {
+  let cubeR = setLaneRight()
+  let cubeL = setLaneLeft()
+  if (cubeR.position.z === 1) {
+    animateRight(cubeR);
+  }
+  else if (cubeL.position.z === 1) {
+    animateLeft(cubeL);
+  }
+
+}
+
+
+movementCube();
+
+
+
+
 
 // if (currentCube.position.z <
 //  3.2) {
@@ -190,7 +191,7 @@ const animate = () => {
 
 //}
 
-animate();
+//animate();
 
 
 // const checkSquare = () => {
