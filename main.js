@@ -7,13 +7,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-scene.add(directionalLight);
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
 
 const geometryPlaneLeft = new THREE.PlaneGeometry(5, 5, 4);
 const materialPlaneLeft = new THREE.MeshBasicMaterial({ color: 0x741B47, side: THREE.DoubleSide });
@@ -37,16 +34,20 @@ let isThereRight = false;
 let newCubeR = new THREE.MeshBasicMaterial;
 let newCubeL = new THREE.MeshBasicMaterial;
 
+// player thingies
+let health = 100;
+let score = 0
+
 // cube.position.copy(geometry);
 // cube.quaternion.copy(geometry);
 // cube.matrixAutoUpdate = false;
 const geometryPlayer = new THREE.BoxGeometry(1.5, 0.1, 0.05);
 const materialPlayer = new THREE.MeshBasicMaterial({ color: 0x522C04 });
 const cubePlayer = new THREE.Mesh(geometryPlayer, materialPlayer);
+cubePlayer.position.set(1, -0.5, 4);
 
 window.addEventListener('keydown', function (e) {
   if (e.key == 'ArrowLeft' && activeL === false) {
-    console.log("left button presses");
     e.preventDefault();
     cubePlayer.position.set(-1, -0.5, 4);
     checkPlane();
@@ -56,7 +57,6 @@ window.addEventListener('keydown', function (e) {
 
   }
   else if (e.key == 'ArrowRight' && activeR === false) {
-    console.log("right button pressed");
     e.preventDefault();
     cubePlayer.position.set(1, -0.5, 4);
     checkPlane();
@@ -125,21 +125,16 @@ const instantiateCubeRight = () => {
 
 setInterval(() => {
   let randomNum = Math.ceil(Math.random() * 10);
-  console.log(randomNum);
   for (let i = 0; i < 10; i++) {
 
-    let j = 5;
 
     if (randomNum >= 0 && randomNum < 5) {
       instantiateCubeLeft()
-      console.log("left");
 
     }
     else if (randomNum >= 5 && randomNum < 10) {
       instantiateCubeRight()
-      console.log("right");
     }
-    j--
   }
 
 }, 1000)
@@ -148,35 +143,75 @@ const MovementR = () => {
   if (newCubeR.position.z < 6) {
     let zValue = + 0.01;
     newCubeR.translateZ(zValue);
+    isThereRight = true;
+
+    if (newCubeR.position.z >= 3.2 && newCubeR.position.z <= 3.9 && activeR === true) {
+      health -= 1;
+
+    }
+    else if (newCubeR.position.z >= 3.2 && newCubeR.position.z <= 3.9 && activeL === true) {
+      score += 10;
+    }
+
   }
   else if (newCubeR.position.z >= 6) {
     isThereRight = false;
-    instantiateCubeRight()
-    deleteCube(newCubeR);
   }
 }
 const MovementL = () => {
   if (newCubeL.position.z < 6) {
     let zValue = + 0.01;
-    console.log(newCubeL.position.z)
     newCubeL.translateZ(zValue);
+    isThereRight = true;
+
+    if (newCubeL.position.z >= 3.2 && newCubeL.position.z <= 3.9 && activeL === true) {
+      health -= 1;
+
+    }
+    else if (newCubeL.position.z >= 3.2 && newCubeL.position.z <= 3.9 && activeR === true) {
+      score += 10;
+    }
   }
   else if (newCubeL.position.z >= 6) {
     isThereLeft = false;
-    instantiateCubeLeft()
-    deleteCube(newCubeL);
-
   }
 }
+
+const winCondition = () => {
+  if (newCubeR.position.z <= 3.2 && activeR === true) {
+    health -= 0.1;
+
+  }
+  else if (newCubeR.position.z <= 3.2 && activeL === true) {
+    score += 10;
+  }
+  else if (newCubeL.position.z <= 3.2 && activeL === true) {
+    health -= 0.1;
+
+  }
+  else if (newCubeL.position.z <= 3.2 && activeR === true) {
+    score += 10;
+  }
+
+}
+
+
 const animate = () => {
   requestAnimationFrame(animate);
   //   cube.rotation.x += 0.01;
   //   cube.rotation.y += 0.01;
   MovementR();
   MovementL();
-  renderer.render(scene, camera);
-};
+  //winCondition();
+  console.log("score" + score + " Health" + health);
+  if (health <= 0) {
+    alert("you died");
+    window.close();
+  }
 
+  renderer.render(scene, camera);
+
+};
 
 // const checkSquare = () => {
 //   let currentSquare = instantiateCubeLeft();
