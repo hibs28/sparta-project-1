@@ -20,6 +20,11 @@ A 3D web game where the player has to change lanes to avoid incoming cubes.
 3. Go back to your terminal
 4. Type 'git clone' and paste the link
 5. To load the game using the terminal by typing in `live-server` 
+6. If you cannot run `live-server` go into the repository and click on index.html
+
+
+#### You can view the page https://hibs28.github.io/sparta-project-1/
+
 
 
 ### Challenges
