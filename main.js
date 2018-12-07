@@ -1,6 +1,5 @@
 var cubeRotation = 0.0;
 
-
 const initDemo = () => {
   const canvas = document.createElement('canvas');
   document.querySelector('body').appendChild(canvas);
@@ -16,7 +15,6 @@ const initDemo = () => {
   // canvas.width = window.innerWidth;
   // canvas.height = window.innerHeight;
   // gl.viewport(0, 0, window.innerWidth, window.innerHeight);
-
 
   canvas.height = 600;
   canvas.width = 700;
@@ -55,7 +53,6 @@ const initDemo = () => {
   };
 
   const buffers = initBuffers(gl);
-
   var then = 0;
 
   // repeats draw scene
@@ -63,9 +60,7 @@ const initDemo = () => {
     now *= 0.001;  // convert to seconds
     const deltaTime = now - then;
     then = now;
-
     drawScene(gl, programInfo, buffers, deltaTime);
-
     requestAnimationFrame(render);
   }
   requestAnimationFrame(render);
@@ -78,7 +73,6 @@ function initBuffers(gl) {
 
   // Select the positionBuffer as the one to apply buffer
   // operations to from here out.
-
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
   //aray of cube positons
@@ -123,7 +117,6 @@ function initBuffers(gl) {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
   //set colors of the faces
-
   const faceColors = [
     [1.0, 1.0, 1.0, 1.0],    // Front face: white
     [1.0, 0.0, 0.0, 1.0],    // Back face: red
@@ -134,7 +127,6 @@ function initBuffers(gl) {
   ];
 
   // Convert the array of colors into a table for all the vertices.
-
   var colors = [];
 
   for (var j = 0; j < faceColors.length; ++j) {
@@ -150,7 +142,6 @@ function initBuffers(gl) {
 
   // Build the element array buffer; this specifies the indices
   // into the vertex arrays for each face's vertices.
-
   const indexBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
@@ -165,7 +156,6 @@ function initBuffers(gl) {
   ];
 
   // Now send the element array to GL
-
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
     new Uint16Array(indices), gl.STATIC_DRAW);
 
@@ -186,11 +176,9 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
   gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
 
   // Clear the canvas before we start drawing on it.
-
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   // Create a perspective matrix
-
   const fieldOfView = 60 * Math.PI / 180;   // in radians
   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;  /// client height and width is the space in the body excluding the scroll bar, margin, border
   const zNear = 0.1;
@@ -205,7 +193,6 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
   //identity center point 
   const modelViewMatrix = glMatrix.mat4.create();
-
 
   glMatrix.mat4.translate(modelViewMatrix,     // destination matrix
     modelViewMatrix,     // matrix to translate
@@ -259,15 +246,8 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
   gl.useProgram(programInfo.program);
 
   //shader uniform
-  gl.uniformMatrix4fv(
-    programInfo.uniformLocations.projectionMatrix,
-    false,
-    projectionMatrix);
-  gl.uniformMatrix4fv(
-    programInfo.uniformLocations.modelViewMatrix,
-    false,
-    modelViewMatrix);
-
+  gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+  gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
   {
     const vertexCount = 36;
     const type = gl.UNSIGNED_SHORT;
@@ -284,7 +264,6 @@ function initShaderProgram(gl, vsSource, fsSource) {
   const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
   const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
 
-
   const shaderProgram = gl.createProgram();
   gl.attachShader(shaderProgram, vertexShader);
   gl.attachShader(shaderProgram, fragmentShader);
@@ -294,26 +273,18 @@ function initShaderProgram(gl, vsSource, fsSource) {
     alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
     return null;
   }
-
   return shaderProgram;
 }
 
 //compiles shader
 function loadShader(gl, type, source) {
   const shader = gl.createShader(type);
-
-
   gl.shaderSource(shader, source);
-
-
   gl.compileShader(shader);
-
-
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
     return null;
   }
-
   return shader;
 }
